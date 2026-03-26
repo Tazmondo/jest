@@ -1,0 +1,12 @@
+-- ROBLOX upstream: https://github.com/facebook/jest/blob/v28.0.0/packages/jest-core/src/lib/__tests__/__snapshots__/logDebugMessages.test.ts.snap
+-- Jest Snapshot v1, https://goo.gl/fbAQLP
+
+local exports = {}
+
+exports["prints the config object 1"] = [[
+
+{"globalConfig":{"maxWorkers":2,"notifyMode":"failure-change","rootDir":"/test_root_dir/","errorOnDeprecated":false,"detectLeaks":false,"maxConcurrency":5,"onlyChanged":false,"findRelatedTests":false,"watchPlugins":[],"detectOpenHandles":false,"testTimeout":5000,"watchman":false,"watchAll":false,"noStackTrace":false,"logHeapUsage":false,"runTestsByPath":false,"updateSnapshot":"none","skipFilter":false,"passWithNoTests":false,"useStderr":false,"changedSince":"","notify":false,"changedFilesWithAncestor":false,"json":false,"coverageReporters":[],"testSequencer":"@jest/test-sequencer","testPathPattern":"","projects":[],"coverageThreshold":{"global":[]},"testFailureExitCode":1,"watch":true,"lastCommit":false,"collectCoverage":false,"coverageProvider":"babel","listTests":false,"collectCoverageFrom":[],"bail":0,"testNamePattern":"","verbose":false,"onlyFailures":false,"silent":false,"snapshotFormat":[],"reporters":[],"expand":false,"coverageDirectory":"coverage","nonFlagArgs":[],"forceExit":false},"configs":{"transform":[],"setupFiles":[],"rootDir":"/path/to/dir","errorOnDeprecated":false,"restoreMocks":false,"testEnvironment":null,"moduleNameMapper":[],"testMatch":[],"detectLeaks":false,"extensionsToTreatAsEsm":[],"moduleFileExtensions":["js"],"detectOpenHandles":false,"coveragePathIgnorePatterns":[],"cwd":"/test_root_dir/","modulePathIgnorePatterns":[],"watchPathIgnorePatterns":[],"automock":false,"skipFilter":false,"snapshotSerializers":[],"timers":"real","transformIgnorePatterns":[],"cache":false,"setupFilesAfterEnv":[],"injectGlobals":true,"snapshotFormat":[],"testRunner":"myRunner","resetModules":false,"testURL":"http =//localhost","extraGlobals":[],"globals":[],"testLocationInResults":false,"testEnvironmentOptions":[],"testRegex":["\\.test\\.js$"],"prettierPath":"prettier","skipNodeResolution":false,"runner":"jest-runner","roots":["path/to/dir/test"],"resetMocks":false,"moduleDirectories":[],"slowTestThreshold":5,"name":"test_name","moduleLoader":"/test_module_loader_path","clearMocks":false,"haste":[],"modulePaths":[],"forceCoverageMatch":[],"testPathIgnorePatterns":[]},"version":"27.4.7"}
+
+]]
+
+return exports

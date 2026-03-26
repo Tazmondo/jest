@@ -1,0 +1,10 @@
+{
+  "name": "jest",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$className": "Workspace",
+      "$path": "Packages"
+    }
+  }
+}
