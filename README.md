@@ -1,3 +1,7 @@
+# Disclosure
+
+Mostly AI-written (GPT-5.6-sol), but it works as a stop-gap until we get official jest-roblox on wally.
+
 # Jest Roblox for Pesde
 
 [![Validate](https://github.com/Tazmondo/jest/actions/workflows/validate.yml/badge.svg)](https://github.com/Tazmondo/jest/actions/workflows/validate.yml)
