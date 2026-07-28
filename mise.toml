@@ -1,0 +1,5 @@
+[tools]
+"github:rojo-rbx/rojo" = "7.7.0"
+"github:pesde-pkg/pesde" = "0.7.3"
+"github:johnnymorganz/stylua" = "latest"
+node = "latest"

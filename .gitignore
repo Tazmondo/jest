@@ -1,0 +1,15 @@
+/.jest-roblox/
+/.pesde-consumer-test/
+/game-output.log
+/game.rbxl
+/jest-output.log
+/package.tar.gz
+/sourcemap.json
+/.pesde/
+/.env
+/.env.*
+!/.env.example
+/mise.local.toml
+/JestRoblox.rbxm
+.DS_Store
+Thumbs.db

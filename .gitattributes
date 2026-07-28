@@ -1,0 +1,10 @@
+* text=auto
+*.json text eol=lf
+*.luau text eol=lf
+*.md text eol=lf
+*.mjs text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+
+Packages/_Index/** linguist-vendored
+Packages/_Workspace/** linguist-vendored

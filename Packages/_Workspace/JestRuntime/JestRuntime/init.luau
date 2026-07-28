@@ -16,6 +16,7 @@ type Array<T> = LuauPolyfill.Array<T>
 type Map<T, U> = LuauPolyfill.Map<T, U>
 type Promise<T> = LuauPolyfill.Promise<T>
 type Omit<T, K> = T --[[ ROBLOX TODO: TS 'Omit' built-in type is not available in Luau ]]
+local Symbol = require(Packages.Symbol)
 local jestTypesModule = require(Packages.JestTypes)
 type Config_ProjectConfig = jestTypesModule.Config_ProjectConfig
 local jestMockModule = require(Packages.JestMock)
@@ -45,6 +46,7 @@ local TypeError = Error
 local _typesModule = require(script._types)
 export type Jest = _typesModule.Jest
 type MockFactory = _typesModule.MockFactory
+type RetryTimesOptions = _typesModule.RetryTimesOptions
 local resolveInstancePath = require(script.resolveInstancePath)
 
 local jestExpectModule = require(Packages.Expect)
@@ -135,7 +137,10 @@ type ModuleRegistry = Map<ModuleScript, InitialModule | Module>
 -- 	)[1]) --[[ ROBLOX CHECK: Resulting type may differ ]] --[[ Upstream: Parameters<typeof require.resolve>[1] ]]
 -- 	& { JEST_RESOLVE_OUTSIDE_VM_OPTION: (true)? }
 -- local testTimeoutSymbol = Symbol:for_("TEST_TIMEOUT_SYMBOL")
--- local retryTimesSymbol = Symbol:for_("RETRY_TIMES")
+local retryTimesSymbol = Symbol.for_("RETRY_TIMES")
+local logErrorsBeforeRetrySymbol = Symbol.for_("LOG_ERRORS_BEFORE_RETRY")
+local waitBeforeRetrySymbol = Symbol.for_("WAIT_BEFORE_RETRY")
+local retryImmediatelySymbol = Symbol.for_("RETRY_IMMEDIATELY")
 -- local NODE_MODULES = tostring(path.sep) .. "node_modules" .. tostring(path.sep)
 -- local function getModuleNameMapper(config: Config_ProjectConfig)
 -- 	if
@@ -335,9 +340,7 @@ type Runtime_private = { --
 	-- _mockRegistry: Map<string, any>,
 	-- _isolatedMockRegistry: Map<string, any> | nil,
 	_mockRegistry: Map<ModuleScript, any>,
-	-- ROBLOX deviation START: add cache of loaded module functions to a test runner
-	_loadedModuleFns: Map<ModuleScript, { any }> | nil,
-	-- ROBLOX deviation END
+	_loadedModuleFns: { [ModuleScript]: { any } }?,
 	_isolatedMockRegistry: Map<ModuleScript, any> | nil,
 	-- ROBLOX deviation END
 	-- ROBLOX deviation START: skipped
@@ -526,7 +529,7 @@ type Runtime_statics = {
 	-- 	coverageOptions: ShouldInstrumentOptions,
 	-- 	testPath: Config_Path
 	-- ) -> Runtime,
-	new: (loadedModuleFns: Map<ModuleScript, any>?) -> Runtime,
+	new: (config: Config_ProjectConfig, loadedModuleFns: { [ModuleScript]: { any } }?) -> Runtime,
 	-- ROBLOX deviation END
 }
 
@@ -546,7 +549,7 @@ local Runtime_private = Runtime :: Runtime_private & Runtime_statics;
 -- 	coverageOptions: ShouldInstrumentOptions,
 -- 	testPath: Config_Path
 -- ): Runtime
-function Runtime.new(config: Config_ProjectConfig, loadedModuleFns: Map<ModuleScript, { any }>?): Runtime
+function Runtime.new(config: Config_ProjectConfig, loadedModuleFns: { [ModuleScript]: { any } }?): Runtime
 	-- ROBLOX deviation START: cast to private type to access methods properly
 	-- local self = setmetatable({}, Runtime)
 	local self = (setmetatable({}, Runtime) :: any) :: Runtime_private
@@ -1632,6 +1635,14 @@ function Runtime_private:clearAllMocks(): ()
 	self._moduleMocker:clearAllMocks()
 end
 function Runtime_private:teardown(): ()
+	-- ROBLOX deviation START: circus reads retryTimes from shared _G, so clear it
+	-- during runtime teardown to keep jest.retryTimes() scoped to one test file.
+	_G[retryTimesSymbol] = nil
+	_G[logErrorsBeforeRetrySymbol] = nil
+	_G[waitBeforeRetrySymbol] = nil
+	_G[retryImmediatelySymbol] = nil
+	-- ROBLOX deviation END
+
 	-- ROBLOX deviation: mocking globals
 	self._moduleMocker:unmockGlobals(self._globalMocker)
 	self:restoreAllMocks()
@@ -1866,8 +1877,8 @@ function Runtime_private:_execModule(
 
 	local modulePath = localModule.filename
 
-	if self._loadedModuleFns and self._loadedModuleFns:has(modulePath) then
-		local loadedModule = self._loadedModuleFns:get(modulePath) :: { any }
+	if self._loadedModuleFns and self._loadedModuleFns[modulePath] then
+		local loadedModule = self._loadedModuleFns[modulePath] :: { any }
 		moduleFunction = loadedModule[1]
 		defaultEnvironment = loadedModule[2]
 	else
@@ -1879,7 +1890,6 @@ function Runtime_private:_execModule(
 		else
 			moduleFunction = loadstring(modulePath.Source, modulePath:GetFullName())
 		end
-		-- ROBLOX NOTE: we are not using assert() as it throws a bare string and we need to throw an Error object
 		if moduleFunction == nil then
 			error(Error.new(errorMessage))
 		end
@@ -1888,7 +1898,7 @@ function Runtime_private:_execModule(
 		defaultEnvironment = getfenv(moduleFunction)
 
 		if self._loadedModuleFns then
-			self._loadedModuleFns:set(modulePath, { moduleFunction, defaultEnvironment, cleanupFn })
+			self._loadedModuleFns[modulePath] = { moduleFunction, defaultEnvironment, cleanupFn }
 		else
 			if cleanupFn ~= nil then
 				table.insert(self._cleanupFns, cleanupFn)
@@ -2551,11 +2561,13 @@ function Runtime_private:_createJestObjectFor(from: ModuleScript): Jest
 	-- 	end
 	-- 	return jestObject
 	-- end
-	-- local function retryTimes(numTestRetries: number)
-	-- 	-- @ts-expect-error: https://github.com/Microsoft/TypeScript/issues/24587
-	-- 	self._environment.global[tostring(retryTimesSymbol)] = numTestRetries
-	-- 	return jestObject
-	-- end
+	local function retryTimes(numTestRetries: number, options: RetryTimesOptions?)
+		_G[retryTimesSymbol] = numTestRetries
+		_G[logErrorsBeforeRetrySymbol] = if options then options.logErrorsBeforeRetry else nil
+		_G[waitBeforeRetrySymbol] = if options then options.waitBeforeRetry else nil
+		_G[retryImmediatelySymbol] = if options then options.retryImmediately else nil
+		return jestObject
+	end
 	-- ROBLOX deviation END
 	-- ROBLOX deviation START: variable predefined
 	-- local jestObject: Jest = {
@@ -2640,8 +2652,8 @@ function Runtime_private:_createJestObjectFor(from: ModuleScript): Jest
 		resetAllMocks = resetAllMocks,
 		resetModules = resetModules,
 		restoreAllMocks = restoreAllMocks,
+		retryTimes = retryTimes,
 		-- ROBLOX deviation START: not implemented yet
-		-- retryTimes = retryTimes,
 		-- runAllImmediates = function()
 		-- 	local fakeTimers = _getFakeTimers()
 		-- 	if fakeTimers == self._environment.fakeTimers then
@@ -2651,9 +2663,6 @@ function Runtime_private:_createJestObjectFor(from: ModuleScript): Jest
 		-- 	end
 		-- end,
 		-- ROBLOX deviation END
-		runAllTicks = function()
-			return _getFakeTimers():runAllTicks()
-		end,
 		runAllTimers = function()
 			return _getFakeTimers():runAllTimers()
 		end,

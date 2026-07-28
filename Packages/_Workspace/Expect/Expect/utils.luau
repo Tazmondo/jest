@@ -124,17 +124,6 @@ local function typeEquality(a: any, b: any): boolean | nil
 		return false
 	end
 
-	-- PARALOV deviation START: fix issues where toStrictEqual rejects equal
-	-- primitives with locked metatables
-	-- See https://github.com/Roblox/jest-roblox/issues/2
-	
-	-- Skip non-tables: metatables on primitives (e.g. strings return "The
-	-- metatable is locked") are not meaningful for type equality.
-	if typeof(a) ~= "table" then
-		return nil
-	end
-	-- PARALOV deviation END
-
 	if not getmetatable(a) and not getmetatable(b) then
 		return nil
 	end

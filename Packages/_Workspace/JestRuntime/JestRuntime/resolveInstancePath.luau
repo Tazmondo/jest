@@ -55,7 +55,7 @@ local function resolveInstancePath(relativeTo: Instance, instancePath: string): 
 		end
 
 		if pathPart == ".." then
-			if prevPathPart and prevPathPart ~= pathPart then
+			if prevPathPart and prevPathPart ~= pathPart and prevPathPart ~= "." then
 				error("paths including '..' after the beginning are not supported in sandboxed string requires")
 			end
 			if not current.Parent then

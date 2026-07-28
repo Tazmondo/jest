@@ -1,10 +1,6 @@
 {
-  "name": "jest",
+  "name": "jest-roblox",
   "tree": {
-    "$className": "DataModel",
-    "Workspace": {
-      "$className": "Workspace",
-      "$path": "Packages"
-    }
+    "$path": "Packages"
   }
 }

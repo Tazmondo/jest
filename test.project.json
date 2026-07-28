@@ -1,0 +1,20 @@
+{
+  "name": "jest-package-tests",
+  "emitLegacyScripts": false,
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Jest": {
+        "$path": "Packages"
+      },
+      "tests": {
+        "$path": "tests"
+      }
+    },
+    "ServerScriptService": {
+      "$properties": {
+        "LoadStringEnabled": true
+      }
+    }
+  }
+}
