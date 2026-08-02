@@ -4,8 +4,6 @@ Mostly AI-written (GPT-5.6-sol), but it works as a stop-gap until we get officia
 
 # Jest Roblox for Pesde
 
-[![Validate](https://github.com/Tazmondo/jest/actions/workflows/validate.yml/badge.svg)](https://github.com/Tazmondo/jest/actions/workflows/validate.yml)
-
 An unofficial [Pesde](https://pesde.dev/) distribution of
 [Roblox Jest](https://github.com/Roblox/jest-roblox) 3.19.0.
 
@@ -17,18 +15,6 @@ and continues the packaging work started by
 
 This project is not an official Roblox distribution and is not affiliated
 with or endorsed by Roblox Corporation.
-
-## Installation
-
-Until a registry release is available, pin the repository to a commit:
-
-```toml
-[dev_dependencies]
-Jest = { repo = "Tazmondo/jest", rev = "<commit SHA>" }
-```
-
-The dependency alias determines the generated linker name. The example above
-creates a `Jest` module in the consumer's Pesde packages directory.
 
 ## Usage
 
@@ -64,24 +50,3 @@ There are three intentional packaging differences:
 The omitted development dependencies do not participate in the packaged
 runtime. This repository's smoke suite and consumer integration tests cover
 the supported distribution boundary.
-
-## Development
-
-Install the tools declared in `mise.toml`, then build the model:
-
-```sh
-mise install
-mise x -c "pesde install"
-mise x -c "rojo build default.project.json --output .jest-roblox/JestRoblox.rbxm"
-```
-
-To reproduce the generated tree, check out the pinned upstream commit in a
-sibling directory and run:
-
-```sh
-mise x -c "node scripts/sync-jest-roblox.mjs ../jest-roblox"
-```
-
-The sync script copies upstream source, rebuilds dependency links and exported
-type forwards, removes obsolete packages, and applies the documented Pesde
-path compatibility patch.

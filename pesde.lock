@@ -2,5 +2,5 @@
 # It is not intended for manual editing.
 format = 2
 name = "tazmondo/jest_roblox"
-version = "3.19.0"
+version = "3.19.1"
 target = "roblox"

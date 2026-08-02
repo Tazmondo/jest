@@ -1,5 +1,5 @@
 name = "tazmondo/jest_roblox"
-version = "3.19.0"
+version = "3.19.1"
 description = "A packaged distribution of Roblox's Jest implementation. May not be entirely accurate."
 license = "MIT"
 authors = ["Roblox", "paralov", "Tazmondo"]
